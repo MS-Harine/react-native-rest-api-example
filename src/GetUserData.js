@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet, ActivityIndicator, View, FlatList, Text, Button, TouchableHighlight, ScrollView } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, FlatList, Text, Button, TouchableHighlight, Modal } from 'react-native';
 import { DATABASE } from '../variable/secret';
+import Axios from 'axios';
 
 export default class GetUserDataScreen extends Component {
   constructor(props) {
@@ -9,9 +10,13 @@ export default class GetUserDataScreen extends Component {
   }
 
   componentDidMount() {
-    const axios = require('axios');
+    this.getUser();
+  }
 
-    axios.get(DATABASE + "/users", {
+  getUser() {
+    this.setState({ isLoaded: false });
+
+    Axios.get(DATABASE + "/users/", {
       timeout: 5000,
     }).then((response) => {
         let users = response.data.results;
@@ -21,6 +26,19 @@ export default class GetUserDataScreen extends Component {
         console.log(error);
         this.setState({isLoaded: true, isError: true, data: error});
       });
+  }
+
+  deleteUser(id) {
+    this.setState({ isLoaded: false });
+
+    Axios.delete(DATABASE + '/users/' + id + '/', {
+      timeout: 5000,
+    }).then((response) => {
+      this.getUser();
+    }).catch((error) => {
+      alert("Error : " + error);
+      this.setState({ isLoaded: true });
+    })
   }
 
   render() {
@@ -46,18 +64,21 @@ export default class GetUserDataScreen extends Component {
           <FlatList
             style={{ alignSelf: 'stretch' }}
             data={this.state.data}
-            keyExtractor={(item, index) => item.url.split('/').reverse()[1]}
+            keyExtractor={(item, index) => item.id.toString()}
             renderItem={({item}) => 
               <View style={styles.line}>
                 <View>
-                  <Text style={styles.label}>Name: </Text>
+                  <Text style={styles.label}>[{item.id}] Name: </Text>
                   <Text style={styles.name}>{item.username}</Text>
                 </View>
                 <View style={{ flexDirection: 'row' }}>
                   <TouchableHighlight>
                     <Button 
                       title="Update"
-                      onPress={() => this.props.navigation.navigate('UpdateUserData')}
+                      onPress={() => this.props.navigation.navigate('UpdateUserData', {
+                        id: item.id,
+                        username: item.username,
+                      })}
                     />
                   </TouchableHighlight>
                   <TouchableHighlight
@@ -65,7 +86,7 @@ export default class GetUserDataScreen extends Component {
                   >
                     <Button 
                       title="Delete"
-                      onPress={() => this.props.navigation.navigate('')}
+                      onPress={() => {this.deleteUser(item.id)}}
                       color='red'
                     />
                   </TouchableHighlight>

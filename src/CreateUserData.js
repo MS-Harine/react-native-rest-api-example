@@ -17,8 +17,8 @@ export default class CreateUserDataScreen extends Component {
     else {
       this.setState({loading: true});
 
-      Axios.post(DATABASE + "/users", {
-        username: this.state.username
+      Axios.post(DATABASE + "/users/", {
+        username: this.state.username.replace(' ', '_')
       }, {
         timeout: 5000,
       }).then((response) => {
