@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, Button, View, StyleSheet } from 'react-native';
+import { Button, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 
 import GetUserDataScreen from './src/GetUserData';
@@ -10,14 +10,18 @@ class MainScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Button
-          title="전체 유저 정보 가져오기"
-          onPress={() => this.props.navigation.navigate('GetUserData')}
-        />
-        <Button
-          title="새로운 유저 정보 만들기"
-          onPress={() => this.props.navigation.navigate('CreateUserData')}
-        />
+        <TouchableHighlight style={styles.content}>
+          <Button
+            title="전체 유저 정보 가져오기"
+            onPress={() => this.props.navigation.navigate('GetUserData')}
+          />
+        </TouchableHighlight>
+        <TouchableHighlight style={styles.content}>
+          <Button
+            title="새로운 유저 정보 만들기"
+            onPress={() => this.props.navigation.navigate('CreateUserData')}
+          />
+        </TouchableHighlight>
       </View>
     )
   }
@@ -28,6 +32,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  content: {
+    margin: 20,
   }
 })
 
