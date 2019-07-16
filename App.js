@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Button, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { createStackNavigator, createAppContainer } from 'react-navigation';
+import { Provider } from 'mobx-react';
+import UserStore from './stores/user';
 
 import GetUserDataScreen from './src/GetUserData';
 import CreateUserDataScreen from './src/CreateUserData';
@@ -53,9 +55,14 @@ const AppNavigator = createStackNavigator(
 );
 
 const AppContainer = createAppContainer(AppNavigator);
+const userStore = new UserStore();
 
 export default class App extends Component {
   render() {
-    return <AppContainer />
+    return (
+      <Provider userStore={userStore}>
+        <AppContainer />
+      </Provider>
+    )
   }
 }

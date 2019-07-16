@@ -1,48 +1,19 @@
 import React, { Component } from 'react';
 import { StyleSheet, ActivityIndicator, View, FlatList, Text, Button, TouchableHighlight, Modal } from 'react-native';
-import { DATABASE } from '../variable/secret';
-import Axios from 'axios';
+import { inject, observer } from 'mobx-react';
 
+@inject('userStore')
+@observer
 export default class GetUserDataScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { isLoaded: false, isError: false, data: null };
-  }
-
   componentDidMount() {
-    this.getUser();
-  }
-
-  getUser() {
-    this.setState({ isLoaded: false });
-
-    Axios.get(DATABASE + "/users/", {
-      timeout: 5000,
-    }).then((response) => {
-        let users = response.data.results;
-        this.setState({isLoaded: true, isError: false, data: users});
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({isLoaded: true, isError: true, data: error});
-      });
-  }
-
-  deleteUser(id) {
-    this.setState({ isLoaded: false });
-
-    Axios.delete(DATABASE + '/users/' + id + '/', {
-      timeout: 5000,
-    }).then((response) => {
-      this.getUser();
-    }).catch((error) => {
-      alert("Error : " + error);
-      this.setState({ isLoaded: true });
-    })
+    const { userStore } = this.props;
+    userStore.getUserList();
   }
 
   render() {
-    if (this.state.isLoaded == false) {
+    const { userStore } = this.props;
+
+    if (userStore.state == 'pending') {
       return (
         <View style={styles.container}>
           <ActivityIndicator size="large" />
@@ -50,12 +21,12 @@ export default class GetUserDataScreen extends Component {
       )
     }
     else {
-      if (this.state.isError) {
+      if (userStore.state == 'error') {
         return (
           <View style={styles.container}>
             <Text>Failed to connect database.</Text>
             <Text>See detail error message below.</Text>
-            <Text style={{ marginTop: 10, color: 'red' }}>{this.state.data.message}</Text>
+            <Text style={{ marginTop: 10, color: 'red' }}>{userStore.errorData}</Text>
           </View>
         )
       }
@@ -63,7 +34,7 @@ export default class GetUserDataScreen extends Component {
         <View style={styles.container}>
           <FlatList
             style={{ alignSelf: 'stretch' }}
-            data={this.state.data}
+            data={userStore.userList}
             keyExtractor={(item, index) => item.id.toString()}
             renderItem={({item}) => 
               <View style={styles.line}>
@@ -86,7 +57,7 @@ export default class GetUserDataScreen extends Component {
                   >
                     <Button 
                       title="Delete"
-                      onPress={() => {this.deleteUser(item.id)}}
+                      onPress={() => {userStore.deleteUser(item.id)}}
                       color='red'
                     />
                   </TouchableHighlight>

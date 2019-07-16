@@ -3,7 +3,9 @@ import { View, StyleSheet, ActivityIndicator, TouchableHighlight, Modal } from '
 import { Input, Button } from 'react-native-elements';
 import Axios from 'axios';
 import { DATABASE } from '../variable/secret';
+import { inject } from 'mobx-react';
 
+@inject('userStore')
 export default class UpdateUserDataScreen extends Component {
   constructor(props) {
     super(props);
@@ -14,21 +16,20 @@ export default class UpdateUserDataScreen extends Component {
   }
 
   submit() {
+    const { userStore } = this.props;
     this.setState({ loading: true });
     
-    Axios.patch(DATABASE + '/users/' + this.id + '/', {
-      username: this.state.username.replace(' ', '_')
-    }, {
-      timeout: 5000,
-    }).then((response) => {
-      this.setState({ loading: false });
-      alert("Success!");
-      this.props.navigation.popToTop();
-    }).catch((error) => {
-      console.log(error);
-      this.setState({ loading: false });
-      alert("Error: " + error);
-    });
+    userStore.updateUser(this.id, this.state.username)
+      .then(result => {
+        if (userStore.state == "error") {
+          alert("Error: ", userStore.errorData);
+        }
+        else 
+          this.props.navigation.pop();
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
   }
 
   render() {
